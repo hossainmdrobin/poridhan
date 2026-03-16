@@ -509,7 +509,7 @@ export default function AdminProductsPage() {
                     <div key={i} className="flex items-center gap-2">
                       <div className="relative h-10 w-10 overflow-hidden rounded border">
                         {c.image ? (
-                          <img src={c.image} alt="Color" fill className="object-cover" />
+                          <img src={c.image} alt="Color" className="object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-neutral-200 text-xs">No img</div>
                         )}
