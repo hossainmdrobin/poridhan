@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+
+
 export interface IProduct extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -9,6 +11,7 @@ export interface IProduct extends Document {
   discountPrice?: number;
   category: mongoose.Types.ObjectId;
   sizes: { size: string; quantity: number }[];
+  colors:{image:string,quantity:number}[]
   stock: number;
   images: string[];
   videoUrl?: string;
@@ -33,6 +36,12 @@ const ProductSchema = new Schema<IProduct>(
     sizes: [
       {
         size: { type: String, enum: ['S', 'M', 'L', 'XL'] },
+        quantity: { type: Number, default: 0 },
+      },
+    ],
+    colors: [
+      {
+        image: { type: String, required: true },
         quantity: { type: Number, default: 0 },
       },
     ],
