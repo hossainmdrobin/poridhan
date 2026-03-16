@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '@/services/api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -16,12 +16,16 @@ export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: '',
     description: '',
     price: '',
     discountPrice: '',
     category: '',
+    images: [] as string[],
+    videoUrl: '',
     sizes: SIZES.map((s) => ({ size: s, quantity: 10 })),
     tags: '',
     isFeatured: false,
@@ -36,6 +40,47 @@ export default function AdminCategoriesPage() {
       .catch(console.error);
   }, []);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          uploadedUrls.push(data.url);
+        }
+      }
+      setForm((f) => ({ ...f, images: [...f.images, ...uploadedUrls] }));
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      alert('Failed to upload images');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setForm((f) => ({
+      ...f,
+      images: f.images.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -46,9 +91,10 @@ export default function AdminCategoriesPage() {
         price: parseFloat(form.price),
         discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : undefined,
         category: form.category || undefined,
+        images: form.images,
+        videoUrl: form.videoUrl || undefined,
         sizes: form.sizes,
         tags: form.tags ? form.tags.split(',').map((t) => t.trim()) : [],
-        images: [],
         isFeatured: form.isFeatured,
         isNewArrival: form.isNewArrival,
         isBestSeller: form.isBestSeller,
@@ -60,6 +106,8 @@ export default function AdminCategoriesPage() {
         price: '',
         discountPrice: '',
         category: '',
+        images: [],
+        videoUrl: '',
         sizes: SIZES.map((s) => ({ size: s, quantity: 10 })),
         tags: '',
         isFeatured: false,
@@ -128,6 +176,46 @@ export default function AdminCategoriesPage() {
                   onChange={(e) => setForm((f) => ({ ...f, discountPrice: e.target.value }))}
                 />
               </div>
+              
+              {/* Image Upload */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-neutral-700">
+                  Product Images
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="mb-2 block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-neutral-100 file:text-neutral-700 hover:file:bg-neutral-200"
+                />
+                {uploading && <p className="text-sm text-neutral-500">Uploading images...</p>}
+                {form.images.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {form.images.map((url, index) => (
+                      <div key={index} className="relative">
+                        <img src={url} alt={`Product ${index + 1}`} className="h-20 w-20 rounded object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Video Link */}
+              <Input
+                placeholder="Video URL (YouTube, Vimeo, etc.)"
+                value={form.videoUrl}
+                onChange={(e) => setForm((f) => ({ ...f, videoUrl: e.target.value }))}
+              />
+
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}

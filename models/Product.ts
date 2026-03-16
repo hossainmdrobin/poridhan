@@ -11,6 +11,7 @@ export interface IProduct extends Document {
   sizes: { size: string; quantity: number }[];
   stock: number;
   images: string[];
+  videoUrl?: string;
   tags: string[];
   seller: mongoose.Types.ObjectId;
   isFeatured: boolean;
@@ -37,6 +38,7 @@ const ProductSchema = new Schema<IProduct>(
     ],
     stock: { type: Number, default: 0 },
     images: [{ type: String }],
+    videoUrl: { type: String },
     tags: [{ type: String }],
     seller: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isFeatured: { type: Boolean, default: false },
