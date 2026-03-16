@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppQRPopup from "@/components/WhatsAppQRPopup";
+import Chatbot from "@/components/Chatbot";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-display",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <main className="min-h-screen">{children}</main>
         <Footer />
         <WhatsAppQRPopup />
+        <Chatbot />
       </body>
     </html>
   );
