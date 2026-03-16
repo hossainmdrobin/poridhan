@@ -1,41 +1,41 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/poridhan';
 
-if (!MONGODB_URI) {
-  throw new Error('Please define MONGODB_URI in your .env.local');
-}
+let isConnected = false;
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
+export const connectToDB = async () => {
+    if (isConnected) {
+        return;
+    }
 
-declare global {
-  var mongoose: MongooseCache | undefined;
-}
+    if (!process.env.MONGODB_URI) {
+        throw new Error("MONGODB_URI is not defined in environment variables");
+    }
+    try {
+        const connect = await mongoose.connect(process.env.MONGODB_URI);
+        isConnected = true;
+        console.log("Connected to the database");
+        return connect;
 
-let cached = global.mongoose;
+    } catch (error) {
+        console.error("Error connecting to the database:", error);
+        throw error;
+    }
+};
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+mongoose.connection.on("disconnected", () => {
+    isConnected = false;
+    console.log("Disconnected from the database");
+});
 
-async function connectDB(): Promise<typeof mongoose> {
-  if (cached!.conn) return cached!.conn;
+mongoose.connection.on("connected", () => {
+    isConnected = true;
+    console.log("Reconnected to the database");
+});
 
-  if (!cached!.promise) {
-    cached!.promise = mongoose.connect(MONGODB_URI);
-  }
+mongoose.connection.on("error", (err) => {
+    isConnected = false;
+    console.error("Database connection error:", err);
+});     
 
-  try {
-    cached!.conn = await cached!.promise;
-  } catch (e) {
-    cached!.promise = null;
-    throw e;
-  }
-
-  return cached!.conn;
-}
-
-export default connectDB;
+export default connectToDB;

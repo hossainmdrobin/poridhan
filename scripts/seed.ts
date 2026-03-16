@@ -5,10 +5,10 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/poridhan';
+const MONGODB_URI = process.env.MONGODB_URI !;
 
 async function seed() {
-  await mongoose.connect(MONGODB_URI);
+  await mongoose.connect("mongodb://Anjana:92430@cluster0-shard-00-00.f0fpp.mongodb.net:27017,cluster0-shard-00-01.f0fpp.mongodb.net:27017,cluster0-shard-00-02.f0fpp.mongodb.net:27017/poridhan?ssl=true&replicaSet=atlas-51yo8h-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0");
 
   // Use dynamic imports to avoid Next.js-specific code
   const { default: User } = await import('../models/User');
@@ -16,11 +16,9 @@ async function seed() {
   const { default: DiscountCode } = await import('../models/DiscountCode');
   const { default: Testimonial } = await import('../models/Testimonial');
 
-  const hashedPassword = await bcrypt.hash('admin123', 12);
-  await User.findOneAndUpdate(
-    { email: 'admin@poridhan.com' },
-    { name: 'Admin', email: 'admin@poridhan.com', password: hashedPassword, role: 'admin', isActive: true },
-    { upsert: true }
+  const hashedPassword = await bcrypt.hash('15j@n1999', 12);
+  await User.insertOne(
+    { name: 'Md Robin Hossain', email: 'hossainmdrobin967@gmail.com', password: hashedPassword, role: 'admin', isActive: true },
   );
   console.log('Admin user: admin@poridhan.com / admin123');
 
