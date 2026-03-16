@@ -56,6 +56,7 @@ export default function AdminProductsPage() {
     images: [] as string[],
     videoUrl: '',
     sizes: SIZES.map((s) => ({ size: s, quantity: 10 })),
+    colors: [] as { image: string; quantity: number }[],
     tags: '',
     isFeatured: false,
     isNewArrival: true,
@@ -105,6 +106,7 @@ export default function AdminProductsPage() {
       images: [],
       videoUrl: '',
       sizes: SIZES.map((s) => ({ size: s, quantity: 10 })),
+      colors: [],
       tags: '',
       isFeatured: false,
       isNewArrival: true,
@@ -125,6 +127,7 @@ export default function AdminProductsPage() {
       images: product.images || [],
       videoUrl: product.videoUrl || '',
       sizes: product.sizes?.length ? product.sizes : SIZES.map((s) => ({ size: s, quantity: 10 })),
+      colors: product.colors?.length ? product.colors : [],
       tags: product.tags?.join(', ') || '',
       isFeatured: product.isFeatured || false,
       isNewArrival: product.isNewArrival || false,
@@ -189,6 +192,7 @@ export default function AdminProductsPage() {
         images: form.images,
         videoUrl: form.videoUrl || undefined,
         sizes: form.sizes,
+        colors: form.colors,
         tags: form.tags ? form.tags.split(',').map((t) => t.trim()) : [],
         isFeatured: form.isFeatured,
         isNewArrival: form.isNewArrival,
@@ -215,6 +219,7 @@ export default function AdminProductsPage() {
         images: [],
         videoUrl: '',
         sizes: SIZES.map((s) => ({ size: s, quantity: 10 })),
+        colors: [],
         tags: '',
         isFeatured: false,
         isNewArrival: true,
@@ -493,6 +498,69 @@ export default function AdminProductsPage() {
                       />
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-neutral-700">Colors & Stock</label>
+                <div className="space-y-2">
+                  {form.colors.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div className="relative h-10 w-10 overflow-hidden rounded border">
+                        {c.image ? (
+                          <img src={c.image} alt="Color" fill className="object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-neutral-200 text-xs">No img</div>
+                        )}
+                      </div>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="Quantity"
+                        value={c.quantity}
+                        onChange={(e) => {
+                          const newColors = [...form.colors];
+                          newColors[i] = { ...c, quantity: parseInt(e.target.value) || 0 };
+                          setForm((f) => ({ ...f, colors: newColors }));
+                        }}
+                        className="w-24"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, colors: f.colors.filter((_, idx) => idx !== i) }))}
+                        className="rounded bg-red-100 px-2 py-1 text-sm text-red-600 hover:bg-red-200"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-neutral-100 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-200">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploading(true);
+                        try {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          const response = await fetch('/api/upload', { method: 'POST', body: formData });
+                          if (response.ok) {
+                            const data = await response.json();
+                            setForm((f) => ({ ...f, colors: [...f.colors, { image: data.url, quantity: 10 }] }));
+                          }
+                        } catch (err) {
+                          console.error('Upload failed:', err);
+                        } finally {
+                          setUploading(false);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    {uploading ? 'Uploading...' : '+ Add Color'}
+                  </label>
                 </div>
               </div>
 
