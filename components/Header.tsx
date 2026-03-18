@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ShoppingBag, User, Search, Heart } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
-import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -149,7 +148,7 @@ export default function Header() {
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                // onClick={handleClose}
+                onClick={() => setMobileOpen(false)}
                 className="absolute right-3 top-3 rounded-full p-1 hover:bg-neutral-100"
                 aria-label="Close"
               >
@@ -157,15 +156,15 @@ export default function Header() {
               </button>
               <div className='flex flex-col min-w-[250px]'>
                 {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-lg font-medium block h-[50px] hover:bg-gray-50"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-lg font-medium block h-[50px] hover:bg-gray-50"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </motion.div>
           </motion.div>
