@@ -106,34 +106,68 @@ export default function Header() {
 
       <AnimatePresence>
         {mobileOpen && (
+          // <motion.div
+          //   initial={{ opacity: 0 }}
+          //   animate={{ opacity: 1 }}
+          //   exit={{ opacity: 0 }}
+          //   className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+          //   onClick={() => setMobileOpen(false)}
+          // >
+          //   <motion.nav
+          //     initial={{ x: '-100%' }}
+          //     animate={{ x: 0 }}
+          //     exit={{ x: '-100%' }}
+          //     className="flex h-full w-72 flex-col gap-6 bg-white p-6"
+          //     onClick={(e) => e.stopPropagation()}
+          //   >
+          //     <button onClick={() => setMobileOpen(false)} className="self-end">
+          //       <X className="h-6 w-6" />
+          //     </button>
+          //     {navLinks.map((link) => (
+          //       <Link
+          //         key={link.href}
+          //         href={link.href}
+          //         className="text-lg font-medium"
+          //         onClick={() => setMobileOpen(false)}
+          //       >
+          //         {link.label}
+          //       </Link>
+          //     ))}
+          //   </motion.nav>
+          // </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 lg:hidden"
-            onClick={() => setMobileOpen(false)}
+            className="fixed h-screen left-0 top-0 z-[100] flex items-center justify-center bg-black/50"
           >
-            <motion.nav
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              className="flex h-full w-72 flex-col gap-6 bg-white p-6"
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative h-screen max-w-sm bg-white p-6 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <button onClick={() => setMobileOpen(false)} className="self-end">
-                <X className="h-6 w-6" />
+              <button
+                // onClick={handleClose}
+                className="absolute right-3 top-3 rounded-full p-1 hover:bg-neutral-100"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
               </button>
-              {navLinks.map((link) => (
+              <div className='flex flex-col min-w-[250px]'>
+                {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-lg font-medium"
+                  className="text-lg font-medium block h-[50px] hover:bg-gray-50"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-            </motion.nav>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
