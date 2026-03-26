@@ -24,7 +24,6 @@ async function getHomeData() {
     const newArrival = newArrivalRes.status === 'fulfilled' ? (await newArrivalRes.value.json()).products || [] : [];
     const bestSeller = bestSellerRes.status === 'fulfilled' ? (await bestSellerRes.value.json()).products || [] : [];
     const testimonials = testimonialsRes.status === 'fulfilled' ? (await testimonialsRes.value.json()) || [] : [];
-
     return {
       banner: banners[0] || null,
       products,
@@ -47,6 +46,7 @@ async function getHomeData() {
 
 export default async function Home() {
   const { banner, featured, newArrival, bestSeller, testimonials } = await getHomeData();
+console.log(featured, "Feature products")
 
   return (
     <>
