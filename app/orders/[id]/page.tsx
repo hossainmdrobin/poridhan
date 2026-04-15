@@ -34,9 +34,10 @@ interface Order {
 
 export default function OrderDetailPage() {
   const params = useParams();
+  const orderId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { token } = useAuthStore();
-  const { data: order, isLoading } = useGetOrderByIdQuery(params.id ?? skipToken, {
-    skip: !token || !params.id,
+  const { data: order, isLoading } = useGetOrderByIdQuery(orderId ?? skipToken, {
+    skip: !token || !orderId,
   });
 
   if (!token) {

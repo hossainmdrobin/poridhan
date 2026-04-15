@@ -9,6 +9,28 @@ interface QueryParams {
     limit?: number;
 }
 
+interface OrderItem {
+    product: string;
+    name: string;
+    price: number;
+    quantity: number;
+    size: string;
+    image?: string;
+}
+
+interface Order {
+    _id: string;
+    orderNumber: string;
+    items: OrderItem[];
+    subtotal: number;
+    discount: number;
+    discountCode?: string;
+    total: number;
+    status: string;
+    shippingAddress: { name: string; phone: string; address: string; city: string };
+    createdAt: string;
+}
+
 function getToken(): string | null {
     if (typeof window === 'undefined') return null;
     try {
@@ -76,7 +98,7 @@ export const api = createApi({
             query: () => '/orders',
             providesTags: ['Orders'],
         }),
-        getOrderById: builder.query<any, string>({
+        getOrderById: builder.query<Order, string>({
             query: (id) => `/orders/${id}`,
             providesTags: ['Orders'],
         }),
