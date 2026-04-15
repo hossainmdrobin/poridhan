@@ -68,32 +68,37 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.4, delay: index * 0.05 }}
     >
       <Link href={`/products/${product.slug}`}>
-        <div className="group relative aspect-[3/4] overflow-hidden bg-neutral-100">
+        <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-slate-100 shadow-lg shadow-slate-200/30 transition-all duration-300 hover:shadow-2xl hover:shadow-rose-200/30">
           <Image
             src={imageUrl}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <button
             onClick={handleWishlist}
-            className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm transition hover:bg-white"
+            className="absolute right-3 top-3 rounded-full bg-white/90 p-2.5 shadow-md transition hover:scale-110 hover:shadow-lg"
             aria-label="Add to wishlist"
           >
             <Heart
-              className={`h-5 w-5 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-neutral-600'}`}
+              className={`h-5 w-5 transition-transform ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-slate-600 hover:text-rose-500'}`}
             />
           </button>
           {hasDiscount && (
-            <span className="absolute left-3 top-3 bg-black px-2 py-1 text-xs font-medium text-white">
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="absolute left-3 top-3 animate-pulse rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-3 py-1 text-xs font-semibold text-white shadow-lg"
+            >
               SALE
-            </span>
+            </motion.span>
           )}
-          <div className="absolute inset-x-0 bottom-0 translate-y-full bg-white/95 p-4 transition-transform duration-300 group-hover:translate-y-0">
+          <div className="absolute inset-x-0 bottom-0 translate-y-full bg-white/95 p-4 backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
             <Button
               size="sm"
-              className="w-full"
+              className="w-full rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
               onClick={handleAddToCart}
             >
               Add to Cart
@@ -101,11 +106,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
         <div className="mt-4 space-y-1">
-          <h3 className="font-medium text-neutral-900 group-hover:underline">{product.name}</h3>
+          <h3 className="font-semibold text-slate-900 transition-colors group-hover:text-rose-600">{product.name}</h3>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-neutral-900">{formatPrice(displayPrice)}</span>
+            <span className="font-bold text-slate-900">{formatPrice(displayPrice)}</span>
             {hasDiscount && (
-              <span className="text-sm text-neutral-400 line-through">{formatPrice(product.price)}</span>
+              <span className="text-sm text-slate-400 line-through">{formatPrice(product.price)}</span>
             )}
           </div>
         </div>

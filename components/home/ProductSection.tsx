@@ -1,8 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ProductCard from '../ProductCard';
 
 interface Product {
@@ -23,18 +22,12 @@ interface ProductSectionProps {
 }
 
 export default function ProductSection({ title, subtitle, products, viewAllHref }: ProductSectionProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ['5%', '-5%']);
-
   if (!products.length) return null;
 
   return (
-    <section ref={containerRef} className="py-16 md:py-24">
+    <section className="relative py-16 md:py-24 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-rose-50/50 via-transparent to-cyan-50/50 opacity-50" />
+      
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -49,7 +42,7 @@ export default function ProductSection({ title, subtitle, products, viewAllHref 
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-3xl font-bold tracking-tight text-neutral-900 md:text-4xl"
+              className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl"
             >
               {title}
             </motion.h2>
@@ -59,7 +52,7 @@ export default function ProductSection({ title, subtitle, products, viewAllHref 
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="mt-2 text-neutral-600"
+                className="mt-2 text-slate-600"
               >
                 {subtitle}
               </motion.p>
@@ -74,12 +67,13 @@ export default function ProductSection({ title, subtitle, products, viewAllHref 
             >
               <Link
                 href={viewAllHref}
-                className="group mt-4 flex items-center gap-2 font-medium text-neutral-900 underline-offset-4 transition-all hover:underline md:mt-0"
+                className="group mt-4 flex items-center gap-2 font-semibold text-rose-600 transition-all hover:text-rose-700 md:mt-0"
               >
                 View All
                 <motion.span
-                  animate={{ x: [0, 5, 0] }}
+                  animate={{ x: [0, 6, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                  className="text-lg"
                 >
                   →
                 </motion.span>
@@ -87,19 +81,19 @@ export default function ProductSection({ title, subtitle, products, viewAllHref 
             </motion.div>
           )}
         </motion.div>
-        <motion.div style={{ y }} className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
           {products.map((product, i) => (
             <motion.div
               key={product._id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
+              transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <ProductCard product={product} index={i} />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
