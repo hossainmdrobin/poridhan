@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api';
+import { useLoginMutation } from '@/store/api';
 import { useAuthStore } from '@/store/authStore';
 
 function LoginForm() {
@@ -20,12 +20,14 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [login] = useLoginMutation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await api.post<{ user: { id: string; name: string; email: string; role: string }; token: string }>('/auth/login', { email, password });
+      const res = await login({ email, password }).unwrap();
       setAuth(
         { id: res.user.id, name: res.user.name, email: res.user.email, role: res.user.role as 'admin' | 'seller' | 'customer' },
         res.token

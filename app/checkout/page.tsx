@@ -8,7 +8,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api';
+import { useValidateDiscountMutation, useCreateOrderMutation } from '@/store/api';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
@@ -30,14 +30,14 @@ export default function CheckoutPage() {
   const subtotal = getSubtotal();
   const total = Math.max(0, subtotal - discount);
 
+  const [validateDiscount] = useValidateDiscountMutation();
+  const [createOrder] = useCreateOrderMutation();
+
   const handleValidateDiscount = async () => {
     if (!discountCode.trim()) return;
     setDiscountError('');
     try {
-      const res = await api.post<{ valid: boolean; discount?: number; error?: string }>('/discount/validate', {
-        code: discountCode.trim(),
-        subtotal,
-      });
+      const res = await validateDiscount({ code: discountCode.trim(), subtotal }).unwrap();
       if (res.valid && res.discount) {
         setDiscount(res.discount);
       } else {
@@ -69,12 +69,12 @@ export default function CheckoutPage() {
         image: i.image,
       }));
 
-      await api.post('/orders', {
+      await createOrder({
         items: orderItems,
         shippingAddress: form,
         paymentMethod: 'cod',
         discountCode: discount > 0 ? discountCode : undefined,
-      });
+      }).unwrap();
 
       clearCart();
       router.push('/orders?success=1');

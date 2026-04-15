@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatPrice } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { api } from '@/services/api';
+import { skipToken } from '@reduxjs/toolkit/query/react';
+import { useGetOrdersQuery } from '@/store/api';
 import Button from '@/components/ui/Button';
 
 interface Order {
@@ -21,17 +22,7 @@ function OrdersContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const { token } = useAuthStore();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!token) return;
-    api
-      .get<Order[]>('/orders')
-      .then(setOrders)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data: orders, isLoading } = useGetOrdersQuery(token ? undefined : skipToken);
 
   if (!token) {
     return (
@@ -54,13 +45,13 @@ function OrdersContent() {
       {success && (
         <div className="mb-6 rounded-lg bg-green-50 p-4 text-green-800">Order placed successfully!</div>
       )}
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-24 animate-pulse rounded bg-neutral-200" />
           ))}
         </div>
-      ) : orders.length ? (
+      ) : orders && orders.length ? (
         <div className="space-y-4">
           {orders.map((order) => (
             <Link

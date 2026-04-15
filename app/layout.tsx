@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import "./globals.css";
+import Providers from "@/app/providers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppQRPopup from "@/components/WhatsAppQRPopup";
@@ -30,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cormorant.variable} ${outfit.variable} font-sans antialiased`}>
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <WhatsAppQRPopup />
-        <Chatbot />
+        <Providers>
+          <Header />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+          <WhatsAppQRPopup />
+          <Chatbot />
+        </Providers>
       </body>
     </html>
   );

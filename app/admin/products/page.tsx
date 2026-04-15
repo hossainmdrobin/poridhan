@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { api } from '@/services/api';
+import { useState, useRef } from 'react';
+import {
+  useGetProductsQuery,
+  useGetCategoriesQuery,
+  useUploadImageMutation,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+} from '@/store/api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
@@ -37,15 +44,22 @@ interface Category {
 const SIZES = ['S', 'M', 'L', 'XL'];
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useGetProductsQuery();
+  const { data: categoriesData = [] } = useGetCategoriesQuery();
+  const [uploadImage] = useUploadImageMutation();
+  const [createProduct] = useCreateProductMutation();
+  const [updateProduct] = useUpdateProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const products = productsData?.products || [];
+  const categories = categoriesData;
+  const loading = productsLoading;
 
   const [form, setForm] = useState({
     name: '',
@@ -64,30 +78,6 @@ export default function AdminProductsPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const data = await api.get<{ products: Product[] }>('/products');
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const data = await api.get<Category[]>('/categories');
-      setCategories(data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,13 +139,8 @@ export default function AdminProductsPage() {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
+        const data = await uploadImage(formData).unwrap();
+        if (data?.url) {
           uploadedUrls.push(data.url);
         }
       }
@@ -201,15 +186,15 @@ export default function AdminProductsPage() {
       };
 
       if (editingProduct) {
-        await api.patch(`/products/${editingProduct._id}`, productData);
+        await updateProduct({ id: editingProduct._id, body: productData }).unwrap();
         alert('Product updated successfully!');
       } else {
-        await api.post('/products/create', productData);
+        await createProduct(productData).unwrap();
         alert('Product created successfully!');
       }
 
       setShowModal(false);
-      fetchProducts();
+      await refetchProducts();
       setForm({
         name: '',
         description: '',
@@ -238,9 +223,9 @@ export default function AdminProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      await api.delete(`/products/${id}`);
+      await deleteProduct(id).unwrap();
       alert('Product deleted successfully!');
-      fetchProducts();
+      await refetchProducts();
     } catch (err) {
       console.error(err);
       alert('Failed to delete product');
@@ -249,10 +234,8 @@ export default function AdminProductsPage() {
 
   const handleStatusToggle = async (product: Product, field: 'isActive' | 'isFeatured' | 'isNewArrival' | 'isBestSeller') => {
     try {
-      await api.patch(`/products/${product._id}`, {
-        [field]: !product[field],
-      });
-      fetchProducts();
+      await updateProduct({ id: product._id, body: { [field]: !product[field] } }).unwrap();
+      await refetchProducts();
     } catch (err) {
       console.error(err);
       alert('Failed to update status');
@@ -546,9 +529,8 @@ export default function AdminProductsPage() {
                         try {
                           const formData = new FormData();
                           formData.append('file', file);
-                          const response = await fetch('/api/upload', { method: 'POST', body: formData });
-                          if (response.ok) {
-                            const data = await response.json();
+                          const data = await uploadImage(formData).unwrap();
+                          if (data?.url) {
                             setForm((f) => ({ ...f, colors: [...f.colors, { image: data.url, quantity: 10 }] }));
                           }
                         } catch (err) {

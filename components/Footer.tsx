@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Input from './ui/Input';
 import Button from './ui/Button';
-import { api } from '@/services/api';
+import { useNewsletterMutation } from '@/store/api';
 
 const footerLinks = {
   Shop: [
@@ -28,12 +28,13 @@ const footerLinks = {
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [sendNewsletter] = useNewsletterMutation();
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
     try {
-      await api.post('/newsletter', { email });
+      await sendNewsletter({ email }).unwrap();
       setStatus('success');
       setEmail('');
     } catch {

@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api';
+import { useCreateProductMutation } from '@/store/api';
 
 const SIZES = ['S', 'M', 'L', 'XL'];
 
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [createProduct] = useCreateProductMutation();
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -30,7 +31,7 @@ export default function NewProductPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/products/create', {
+      await createProduct({
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
@@ -42,7 +43,7 @@ export default function NewProductPage() {
         isFeatured: form.isFeatured,
         isNewArrival: form.isNewArrival,
         isBestSeller: form.isBestSeller,
-      });
+      }).unwrap();
       router.push('/seller/products');
     } catch (err) {
       console.error(err);

@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import Image from 'next/image';
+import { useGetWhatsAppQrQuery } from '@/store/api';
 
 export default function WhatsAppQRPopup() {
   const [isOpen, setIsOpen] = useState(false);
-  const [qrData, setQrData] = useState<{ qr: string; url: string } | null>(null);
+  const { data: qrData, isFetching } = useGetWhatsAppQrQuery(undefined, {
+    skip: !isOpen,
+  });
 
   useEffect(() => {
     const seen = sessionStorage.getItem('whatsapp-popup-seen');
@@ -17,14 +20,10 @@ export default function WhatsAppQRPopup() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (isOpen && !qrData) {
-      fetch('/api/whatsapp/qr')
-        .then((r) => r.json())
-        .then(setQrData)
-        .catch(console.error);
-    }
-  }, [isOpen, qrData]);
+  // const handleClose = () => {
+  //   setIsOpen(false);
+  //   sessionStorage.setItem('whatsapp-popup-seen', 'true');
+  // };
 
   const handleClose = () => {
     setIsOpen(false);

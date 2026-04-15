@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api';
+import { useRegisterMutation } from '@/store/api';
 import { useAuthStore } from '@/store/authStore';
 
 export default function RegisterPage() {
@@ -19,12 +19,14 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [register] = useRegisterMutation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await api.post<{ user: { id: string; name: string; email: string; role: string }; token: string }>('/auth/register', { name, email, password });
+      const res = await register({ name, email, password }).unwrap();
       setAuth(
         { id: res.user.id, name: res.user.name, email: res.user.email, role: res.user.role as 'admin' | 'seller' | 'customer' },
         res.token

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { api } from '@/services/api';
+import { useState, useRef } from 'react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { useGetCategoriesQuery, useUploadImageMutation, useCreateProductMutation } from '@/store/api';
 
 interface Category {
   _id: string;
@@ -13,7 +13,9 @@ interface Category {
 const SIZES = ['S', 'M', 'L', 'XL'];
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categories = [] } = useGetCategoriesQuery();
+  const [uploadImage] = useUploadImageMutation();
+  const [createProduct] = useCreateProductMutation();
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -33,13 +35,6 @@ export default function AdminCategoriesPage() {
     isBestSeller: false,
   });
 
-  useEffect(() => {
-    api
-      .get<Category[]>('/categories')
-      .then(setCategories)
-      .catch(console.error);
-  }, []);
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -51,14 +46,9 @@ export default function AdminCategoriesPage() {
         const file = files[i];
         const formData = new FormData();
         formData.append('file', file);
-        
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
+
+        const data = await uploadImage(formData).unwrap();
+        if (data?.url) {
           uploadedUrls.push(data.url);
         }
       }
@@ -85,7 +75,7 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/products/create', {
+      await createProduct({
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
@@ -98,7 +88,7 @@ export default function AdminCategoriesPage() {
         isFeatured: form.isFeatured,
         isNewArrival: form.isNewArrival,
         isBestSeller: form.isBestSeller,
-      });
+      }).unwrap();
       setShowModal(false);
       setForm({
         name: '',

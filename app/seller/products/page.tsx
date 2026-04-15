@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { api } from '@/services/api';
+import { useGetProductsQuery, useDeleteProductMutation } from '@/store/api';
 
 interface Product {
   _id: string;
@@ -19,22 +18,16 @@ interface Product {
 }
 
 export default function SellerProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: productsData, isLoading, refetch } = useGetProductsQuery();
+  const [deleteProduct] = useDeleteProductMutation();
 
-  useEffect(() => {
-    api
-      .get<{ products: Product[] }>('/products')
-      .then((res) => setProducts(res.products || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const products = productsData?.products ?? [];
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return;
     try {
-      await api.delete(`/products/${id}`);
-      setProducts((p) => p.filter((x) => x._id !== id));
+      await deleteProduct(id).unwrap();
+      await refetch();
     } catch (e) {
       console.error(e);
     }
@@ -52,7 +45,7 @@ export default function SellerProductsPage() {
           Add Product
         </Link>
       </div>
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-20 animate-pulse rounded bg-neutral-200" />

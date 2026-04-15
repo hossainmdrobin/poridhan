@@ -1,52 +1,27 @@
+'use client';
+
 import HeroBanner from '@/components/home/HeroBanner';
 import ProductSection from '@/components/home/ProductSection';
 import PromoSection from '@/components/home/PromoSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import BrandStory from '@/components/home/BrandStory';
-import { getBaseUrl } from '@/lib/constants';
+import { useGetBannersQuery, useGetProductsQuery, useGetTestimonialsQuery } from '@/store/api';
 
-async function getHomeData() {
-  const base = getBaseUrl();
-  try {
-    const [bannersRes, productsRes, featuredRes, newArrivalRes, bestSellerRes, testimonialsRes] =
-      await Promise.allSettled([
-        fetch(`${base}/api/banners`),
-        fetch(`${base}/api/products?limit=8`),
-        fetch(`${base}/api/products?featured=true&limit=4`),
-        fetch(`${base}/api/products?newArrival=true&limit=4`),
-        fetch(`${base}/api/products?bestSeller=true&limit=4`),
-        fetch(`${base}/api/testimonials`),
-      ]);
+export default function Home() {
+  const { data: bannersData } = useGetBannersQuery();
+  const { data: productsData } = useGetProductsQuery({ limit: 8 });
+  const { data: featuredData } = useGetProductsQuery({ featured: true, limit: 4 });
+  const { data: newArrivalData } = useGetProductsQuery({ newArrival: true, limit: 4 });
+  const { data: bestSellerData } = useGetProductsQuery({ bestSeller: true, limit: 4 });
+  const { data: testimonials = [] } = useGetTestimonialsQuery();
 
-    const banners = bannersRes.status === 'fulfilled' ? (await bannersRes.value.json()).filter(Boolean) : [];
-    const products = productsRes.status === 'fulfilled' ? (await productsRes.value.json()).products || [] : [];
-    const featured = featuredRes.status === 'fulfilled' ? (await featuredRes.value.json()).products || [] : [];
-    const newArrival = newArrivalRes.status === 'fulfilled' ? (await newArrivalRes.value.json()).products || [] : [];
-    const bestSeller = bestSellerRes.status === 'fulfilled' ? (await bestSellerRes.value.json()).products || [] : [];
-    const testimonials = testimonialsRes.status === 'fulfilled' ? (await testimonialsRes.value.json()) || [] : [];
-    return {
-      banner: banners[0] || null,
-      products,
-      featured: featured.length ? featured : products.slice(0, 4),
-      newArrival: newArrival.length ? newArrival : products.slice(0, 4),
-      bestSeller: bestSeller.length ? bestSeller : products.slice(4, 8),
-      testimonials,
-    };
-  } catch {
-    return {
-      banner: null,
-      products: [],
-      featured: [],
-      newArrival: [],
-      bestSeller: [],
-      testimonials: [],
-    };
-  }
-}
+  console.log(newArrivalData)
 
-export default async function Home() {
-  const { banner, featured, newArrival, bestSeller, testimonials } = await getHomeData();
-console.log(featured, "Feature products")
+  const banner = bannersData?.[0] ?? null;
+  const products = productsData?.products ?? [];
+  const featured = featuredData?.products ?? [];
+  const newArrival = newArrivalData?.products ?? [];
+  const bestSeller = bestSellerData?.products ?? [];
 
   return (
     <>
@@ -54,20 +29,20 @@ console.log(featured, "Feature products")
       <ProductSection
         title="Featured"
         subtitle="Handpicked favorites"
-        products={featured}
+        products={featured.length ? featured : products.slice(0, 4)}
         viewAllHref="/products?featured=true"
       />
       <ProductSection
         title="New Arrivals"
         subtitle="Fresh styles for the season"
-        products={newArrival}
+        products={newArrival.length ? newArrival : products.slice(0, 4)}
         viewAllHref="/products?newArrival=true"
       />
       <PromoSection />
       <ProductSection
         title="Best Sellers"
         subtitle="Customer favorites"
-        products={bestSeller}
+        products={bestSeller.length ? bestSeller : products.slice(4, 8)}
         viewAllHref="/products?bestSeller=true"
       />
       <TestimonialsSection testimonials={testimonials} />
