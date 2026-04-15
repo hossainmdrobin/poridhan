@@ -7,9 +7,10 @@ import { useGetProductByIdQuery } from '@/store/api';
 
 export default function ProductByIdRedirect() {
   const params = useParams();
+  const productId = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
-  const { data, isSuccess } = useGetProductByIdQuery(params.id ?? skipToken, {
-    skip: !params.id,
+  const { data, isSuccess } = useGetProductByIdQuery(productId ?? skipToken, {
+    skip: !productId,
   });
 
   useEffect(() => {

@@ -45,7 +45,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!data) return;
     setProduct(data);
-    setSelectedSize(data.sizes?.find((s) => s.quantity > 0)?.size || '');
+    setSelectedSize(data.sizes?.find((s: { size: string; quantity: number }) => s.quantity > 0)?.size || '');
     addRecentlyViewed({
       productId: data._id,
       name: data.name,
