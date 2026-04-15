@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { api } from '@/services/api';
+import { skipToken } from '@reduxjs/toolkit/query/react';
+import { useGetOrderByIdQuery } from '@/store/api';
 import Button from '@/components/ui/Button';
 
 interface OrderItem {
@@ -34,18 +34,11 @@ interface Order {
 
 export default function OrderDetailPage() {
   const params = useParams();
+  const orderId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { token } = useAuthStore();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!token) return;
-    api
-      .get<Order>(`/orders/${params.id}`)
-      .then(setOrder)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [params.id, token]);
+  const { data: order, isLoading } = useGetOrderByIdQuery(orderId ?? skipToken, {
+    skip: !token || !orderId,
+  });
 
   if (!token) {
     return (
@@ -58,7 +51,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return <div className="mx-auto max-w-7xl px-4 py-12">Loading...</div>;
   }
 

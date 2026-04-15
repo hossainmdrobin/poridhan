@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -10,7 +10,7 @@ import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
 import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import Button from '@/components/ui/Button';
-import { api } from '@/services/api';
+import { useGetProductBySlugQuery } from '@/store/api';
 
 interface Product {
   _id: string;
@@ -40,25 +40,22 @@ export default function ProductDetailPage() {
   const availableSizes = product?.sizes?.filter((s) => s.quantity > 0).map((s) => s.size) || [];
   const displayPrice = product?.discountPrice && product.discountPrice < product.price ? product.discountPrice : product?.price;
 
-  useEffect(() => {
-    api
-      .get<Product>(`/products/slug/${slug}`)
-      .then((data) => {
-        setProduct(data);
-        setSelectedSize(data.sizes?.find((s) => s.quantity > 0)?.size || '');
-        addRecentlyViewed({
-          productId: data._id,
-          name: data.name,
-          price: data.price,
-          discountPrice: data.discountPrice,
-          image: data.images?.[0],
-        });
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [slug, addRecentlyViewed]);
+  const { data, isLoading } = useGetProductBySlugQuery(slug, { skip: !slug });
 
-  if (loading) {
+  useEffect(() => {
+    if (!data) return;
+    setProduct(data);
+    setSelectedSize(data.sizes?.find((s: { size: string; quantity: number }) => s.quantity > 0)?.size || '');
+    addRecentlyViewed({
+      productId: data._id,
+      name: data.name,
+      price: data.price,
+      discountPrice: data.discountPrice,
+      image: data.images?.[0],
+    });
+  }, [data, addRecentlyViewed]);
+
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 md:grid-cols-2">

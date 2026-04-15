@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { formatPrice } from '@/lib/utils';
-import { api } from '@/services/api';
+import { useGetOrdersQuery, useUpdateOrderMutation } from '@/store/api';
 
 interface Order {
   _id: string;
@@ -14,22 +13,12 @@ interface Order {
 }
 
 export default function SellerOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api
-      .get<Order[]>('/orders')
-      .then((res) => (Array.isArray(res) ? res : []))
-      .then(setOrders)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: orders = [], isLoading } = useGetOrdersQuery();
+  const [updateOrder] = useUpdateOrderMutation();
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await api.patch(`/orders/${id}`, { status });
-      setOrders((o) => o.map((x) => (x._id === id ? { ...x, status } : x)));
+      await updateOrder({ id, body: { status } }).unwrap();
     } catch (e) {
       console.error(e);
     }
@@ -38,7 +27,7 @@ export default function SellerOrdersPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <h1 className="mb-8 text-2xl font-bold">Orders</h1>
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-16 animate-pulse rounded bg-neutral-200" />

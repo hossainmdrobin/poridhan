@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { api } from '@/services/api';
+import { useState } from 'react';
+import { useGetUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '@/store/api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
@@ -17,8 +17,10 @@ interface User {
 }
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: usersData = [], isLoading, refetch } = useGetUsersQuery();
+  const [createUser] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -34,20 +36,7 @@ export default function AdminUsersPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const data = await api.get<User[]>('/users');
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const users = usersData;
 
   const openCreateModal = () => {
     setEditingUser(null);
@@ -83,7 +72,6 @@ export default function AdminUsersPage() {
 
     try {
       if (editingUser) {
-        // Update existing user
         const updateData: Record<string, unknown> = {
           name: form.name,
           email: form.email,
@@ -92,29 +80,27 @@ export default function AdminUsersPage() {
           address: form.address || undefined,
           isActive: form.isActive,
         };
-        
-        // Only include password if it's provided
+
         if (form.password) {
           updateData.password = form.password;
         }
 
-        await api.patch(`/users/${editingUser._id}`, updateData);
+        await updateUser({ id: editingUser._id, body: updateData }).unwrap();
         alert('User updated successfully!');
       } else {
-        // Create new user
-        await api.post('/users', {
+        await createUser({
           name: form.name,
           email: form.email,
           password: form.password,
           role: form.role,
           phone: form.phone || undefined,
           address: form.address || undefined,
-        });
+        }).unwrap();
         alert('User created successfully!');
       }
 
       setShowModal(false);
-      fetchUsers();
+      await refetch();
     } catch (error) {
       console.error('Error saving user:', error);
       alert('Failed to save user. Please try again.');
@@ -129,9 +115,9 @@ export default function AdminUsersPage() {
     }
 
     try {
-      await api.delete(`/users/${userId}`);
+      await deleteUser(userId).unwrap();
       alert('User deleted successfully!');
-      fetchUsers();
+      await refetch();
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('Failed to delete user. Please try again.');
@@ -140,10 +126,11 @@ export default function AdminUsersPage() {
 
   const toggleUserStatus = async (user: User) => {
     try {
-      await api.patch(`/users/${user._id}`, {
-        isActive: !user.isActive,
-      });
-      fetchUsers();
+      await updateUser({
+        id: user._id,
+        body: { isActive: !user.isActive },
+      }).unwrap();
+      await refetch();
     } catch (error) {
       console.error('Error toggling user status:', error);
       alert('Failed to update user status.');
@@ -166,7 +153,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-600"></div>

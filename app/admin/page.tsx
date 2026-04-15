@@ -1,35 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Users, ShoppingCart, DollarSign } from 'lucide-react';
-import { api } from '@/services/api';
+import { useGetProductsQuery, useGetOrdersQuery, useGetUsersQuery } from '@/store/api';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ products: 0, users: 0, orders: 0, revenue: 0 });
+  const { data: productsData } = useGetProductsQuery();
+  const { data: ordersData } = useGetOrdersQuery();
+  const { data: usersData } = useGetUsersQuery();
 
-  useEffect(() => {
-    Promise.all([
-      api.get<{ products: unknown[] }>('/products').catch(() => ({ products: [] })),
-      api.get<unknown[]>('/orders').catch(() => []),
-    ]).then(([productsRes, orders]) => {
-      const products = productsRes.products || [];
-      const ordersList = Array.isArray(orders) ? orders : [];
-      const revenue = ordersList.reduce((sum: number, o: unknown) => sum + ((o as { total?: number }).total || 0), 0);
-      setStats({
-        products: products.length,
-        users: 0,
-        orders: ordersList.length,
-        revenue,
-      });
-    });
-  }, []);
+  const productsCount = productsData?.products?.length ?? 0;
+  const ordersCount = ordersData?.length ?? 0;
+  const usersCount = usersData?.length ?? 0;
+  const revenue = ordersData?.reduce((sum: number, order: any) => sum + (order?.total ?? 0), 0) ?? 0;
 
   const cards = [
-    { label: 'Products', value: stats.products, icon: Package },
-    { label: 'Users', value: stats.users, icon: Users },
-    { label: 'Orders', value: stats.orders, icon: ShoppingCart },
-    { label: 'Revenue (BDT)', value: stats.revenue.toLocaleString(), icon: DollarSign },
+    { label: 'Products', value: productsCount, icon: Package },
+    { label: 'Users', value: usersCount, icon: Users },
+    { label: 'Orders', value: ordersCount, icon: ShoppingCart },
+    { label: 'Revenue (BDT)', value: revenue.toLocaleString(), icon: DollarSign },
   ];
 
   return (

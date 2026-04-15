@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Bot, User as UserIcon, Loader2 } from 'lucide-react';
+import { useChatbotMutation } from '@/store/api';
 
 interface Message {
   id: string;
@@ -31,6 +32,7 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [chatbotTrigger] = useChatbotMutation();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,21 +60,13 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: messageText, history: messages }),
-      });
-
-      const data = await response.json();
-
+      const data = await chatbotTrigger({ message: messageText, history: messages }).unwrap();
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       const errorMessage: Message = {
