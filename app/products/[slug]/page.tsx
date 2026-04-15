@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Heart, Minus, Plus } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
@@ -10,6 +9,7 @@ import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
 import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import Button from '@/components/ui/Button';
+import ProductImageGallery from '@/components/ProductImageGallery';
 import { useGetProductBySlugQuery } from '@/store/api';
 
 interface Product {
@@ -95,16 +95,13 @@ export default function ProductDetailPage() {
       className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
     >
       <div className="grid gap-12 lg:grid-cols-2">
-        <div className="aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100">
-          <Image
-            src={product.images?.[0] || 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800'}
-            alt={product.name}
-            width={800}
-            height={1000}
-            className="h-full w-full object-cover"
+        <div className="lg:col-span-1">
+          <ProductImageGallery
+            images={product.images || []}
+            productName={product.name}
           />
         </div>
-        <div>
+        <div className="lg:col-span-1">
           <h1 className="text-3xl font-bold text-neutral-900">{product.name}</h1>
           <div className="mt-4 flex items-center gap-2">
             <span className="text-2xl font-semibold text-neutral-900">{formatPrice(displayPrice!)}</span>
