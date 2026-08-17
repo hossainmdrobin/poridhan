@@ -11,3 +11,7 @@ npm run seed -- reviews --force	Seed reviews
 npm run seed -- newsletters --force	Seed newsletters
 npm run seed -- clear	Clear all seeded data
 npm run seed -- reset --force	Clear and re-seed everything
+
+TO INSERT INFO 
+npx tsx scripts/seed.ts info
+npx tsx scripts/seed.ts all --force

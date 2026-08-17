@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { groqEmbed } from '../lib/agent/modelManager';
 
 export interface IInfo extends Document {
   _id: mongoose.Types.ObjectId;
@@ -8,7 +9,7 @@ export interface IInfo extends Document {
   updatedAt: Date;
 }
 
-const InfoSchema = new Schema(
+const InfoSchema = new Schema<IInfo>(
   {
     text: { type: String, required: true },
     embedding: [{ type: Number }],
@@ -16,4 +17,16 @@ const InfoSchema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('Info', InfoSchema);
+InfoSchema.index({ text: 'text' });
+
+InfoSchema.pre('save', async function () {
+  if (this.isModified('text') || !this.embedding?.length) {
+    try {
+      this.embedding = await groqEmbed(this.text);
+    } catch (error) {
+      console.error('Failed to generate embedding:', error);
+    }
+  }
+});
+
+export default (mongoose.models.Info as Model<IInfo>) || mongoose.model<IInfo>('Info', InfoSchema);
