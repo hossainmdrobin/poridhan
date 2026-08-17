@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { Command } from 'commander';
 import { connect, disconnect } from './utils';
-import { seedUsers, seedCategories, seedProducts, seedOrders, seedDiscounts, seedBanners, seedTestimonials, seedReviews, seedNewsletters, clearAll } from './seeders';
+import { seedUsers, seedCategories, seedProducts, seedOrders, seedDiscounts, seedBanners, seedTestimonials, seedReviews, seedNewsletters, seedInfo, clearAll } from './seeders';
 
 const program = new Command();
 
@@ -26,6 +26,7 @@ program
       await seedTestimonials(options.force);
       await seedReviews(options.force);
       await seedNewsletters(options.force);
+      await seedInfo(options.force);
       console.log('Seed complete');
     } finally {
       await disconnect();
@@ -150,6 +151,19 @@ program
   });
 
 program
+  .command('info')
+  .description('Seed info entries')
+  .option('--force', 'Force re-seed even if data exists')
+  .action(async (options) => {
+    await connect();
+    try {
+      await seedInfo(options.force);
+    } finally {
+      await disconnect();
+    }
+  });
+
+program
   .command('clear')
   .description('Clear all seeded data')
   .action(async () => {
@@ -179,6 +193,7 @@ program
       await seedTestimonials(options.force);
       await seedReviews(options.force);
       await seedNewsletters(options.force);
+      await seedInfo(options.force);
       console.log('Reset complete');
     } finally {
       await disconnect();

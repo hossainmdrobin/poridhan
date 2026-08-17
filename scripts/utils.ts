@@ -21,8 +21,9 @@ export async function loadModels() {
   const { default: Review } = await import('../models/Review');
   const { default: Newsletter } = await import('../models/Newsletter');
   const { default: WhatsAppLead } = await import('../models/WhatsAppLead');
+  const { default: Info } = await import('../models/Info');
 
-  return { User, Category, Product, Order, DiscountCode, Banner, Testimonial, Review, Newsletter, WhatsAppLead };
+  return { User, Category, Product, Order, DiscountCode, Banner, Testimonial, Review, Newsletter, WhatsAppLead, Info };
 }
 
 export async function hashPassword(password: string) {

@@ -1,7 +1,7 @@
 import { loadModels } from '../utils';
 
 export async function clearAll() {
-  const { User, Category, Product, Order, DiscountCode, Banner, Testimonial, Review, Newsletter, WhatsAppLead } = await loadModels();
+  const { User, Category, Product, Order, DiscountCode, Banner, Testimonial, Review, Newsletter, WhatsAppLead, Info } = await loadModels();
   await Promise.all([
     User.deleteMany({}),
     Category.deleteMany({}),
@@ -13,6 +13,7 @@ export async function clearAll() {
     Review.deleteMany({}),
     Newsletter.deleteMany({}),
     WhatsAppLead.deleteMany({}),
+    Info.deleteMany({}),
   ]);
   console.log('Cleared all collections');
 }
@@ -26,3 +27,4 @@ export { seedBanners } from './banners';
 export { seedTestimonials } from './testimonials';
 export { seedReviews } from './reviews';
 export { seedNewsletters } from './newsletters';
+export { seedInfo } from './info';
