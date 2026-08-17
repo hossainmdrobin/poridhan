@@ -8,7 +8,7 @@ export interface IInfo extends Document {
   updatedAt: Date;
 }
 
-const InfoSchema = new Schema<IInfo>(
+const InfoSchema = new Schema(
   {
     text: { type: String, required: true },
     embedding: [{ type: Number }],
@@ -16,4 +16,4 @@ const InfoSchema = new Schema<IInfo>(
   { timestamps: true }
 );
 
-export default (mongoose.models.Info as Model<IInfo>) || mongoose.model<IInfo>('Info', InfoSchema);
+export default mongoose.model('Info', InfoSchema);
