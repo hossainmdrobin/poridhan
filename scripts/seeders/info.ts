@@ -25,12 +25,15 @@ export async function seedInfo(force = false) {
   const texts = info.map(item => item.text);
   const embeddings = await groqEmbed(texts);
 
+  if (!embeddings || embeddings.length !== texts.length) {
+    throw new Error('Failed to generate embeddings for info entries.');
+  }
+
   const docs = info.map((item, index) => ({
     ...item,
     embedding: embeddings[index],
   }));
 
   const created = await Info.insertMany(docs);
-  console.log(`Seeded ${created.length} info entries`);
   return created;
 }
