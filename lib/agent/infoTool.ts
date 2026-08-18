@@ -48,11 +48,11 @@ export const searchInfo = tool(
           score: { $meta: "vectorSearchScore" },
         },
       },
-      {
-        $match: {
-          score: { $gte: threshold },
-        },
-      },
+      // {
+      //   $match: {
+      //     score: { $gte: threshold },
+      //   },
+      // },
     ]);
 
     return JSON.stringify({
