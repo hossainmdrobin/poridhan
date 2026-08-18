@@ -22,7 +22,7 @@ InfoSchema.index({ text: 'text' });
 InfoSchema.pre('save', async function () {
   if (this.isModified('text') || !this.embedding?.length) {
     try {
-      this.embedding = await groqEmbed(this.text);
+      this.embedding = await groqEmbed(this.text) as number[];
     } catch (error) {
       console.error('Failed to generate embedding:', error);
     }
