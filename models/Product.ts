@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { groqEmbed } from '../lib/agent/modelManager';
 
 
 
@@ -64,5 +65,16 @@ const ProductSchema = new Schema<IProduct>(
 );
 
 ProductSchema.index({ name: 'text', description: 'text', tags: 'text' });
+
+ProductSchema.pre('save', async function () {
+  if (this.isModified('name') || this.isModified('description') || this.isModified('tags') || !this.embedding?.length) {
+    try {
+      const textToEmbed = `${this.name}. ${this.description}. ${this.tags?.join(', ') || ''}`;
+      this.embedding = await groqEmbed(textToEmbed) as number[];
+    } catch (error) {
+      console.error('Failed to generate embedding:', error);
+    }
+  }
+});
 
 export default (mongoose.models.Product as Model<IProduct>) || mongoose.model<IProduct>('Product', ProductSchema);
