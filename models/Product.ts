@@ -7,11 +7,12 @@ export interface IProduct extends Document {
   name: string;
   slug: string;
   description: string;
+  quantity:number;
   price: number;
   discountPrice?: number;
   category: mongoose.Types.ObjectId;
   sizes: { size: string; quantity: number }[];
-  colors:{image:string,quantity:number}[]
+  colors:{color:string,image:string,quantity:number}[]
   stock: number;
   images: string[];
   videoUrl?: string;
@@ -21,6 +22,7 @@ export interface IProduct extends Document {
   isNewArrival: boolean;
   isBestSeller: boolean;
   isActive: boolean;
+  embedding:number[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +34,7 @@ const ProductSchema = new Schema<IProduct>(
     description: { type: String, required: true },
     price: { type: Number, required: true },
     discountPrice: Number,
+    quantity: {type:Number, default:0},
     category: { type: Schema.Types.ObjectId, ref: 'Category' },
     sizes: [
       {
@@ -41,6 +44,7 @@ const ProductSchema = new Schema<IProduct>(
     ],
     colors: [
       {
+        color: String,
         image: { type: String, required: true },
         quantity: { type: Number, default: 0 },
       },
@@ -54,6 +58,7 @@ const ProductSchema = new Schema<IProduct>(
     isNewArrival: { type: Boolean, default: false },
     isBestSeller: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    embedding:[{type:Number}]
   },
   { timestamps: true }
 );
