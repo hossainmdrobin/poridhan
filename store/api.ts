@@ -82,6 +82,11 @@ export const api = createApi({
             query: (id) => `/products/${id}`,
             providesTags: ['Products'],
         }),
+        searchProducts: builder.query<{ products: any[] }, { q: string; limit?: number; threshold?: number }>({
+            query: ({ q, limit, threshold }) =>
+                `/products/search${buildQuery({ q, limit, threshold })}`,
+            providesTags: ['Products'],
+        }),
         getCategories: builder.query<any[], void>({
             query: () => '/categories',
             providesTags: ['Categories'],
@@ -169,6 +174,7 @@ export const {
     useGetProductsQuery,
     useGetProductBySlugQuery,
     useGetProductByIdQuery,
+    useSearchProductsQuery,
     useGetCategoriesQuery,
     useGetTestimonialsQuery,
     useGetBannersQuery,

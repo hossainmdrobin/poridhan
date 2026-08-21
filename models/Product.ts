@@ -77,4 +77,43 @@ ProductSchema.pre('save', async function () {
   }
 });
 
+async function generateEmbeddingForUpdate(
+  update: Record<string, any>,
+  current: IProduct | null
+) {
+  const hasName = 'name' in update || '$set' in update && 'name' in (update.$set || {});
+  const hasDescription = 'description' in update || '$set' in update && 'description' in (update.$set || {});
+  const hasTags = 'tags' in update || '$set' in update && 'tags' in (update.$set || {});
+
+  if (!hasName && !hasDescription && !hasTags) return;
+
+  const name = (update.name ?? update.$set?.name ?? current?.name) as string;
+  const description = (update.description ?? update.$set?.description ?? current?.description) as string;
+  const tags = (update.tags ?? update.$set?.tags ?? current?.tags) as string[] | undefined;
+
+  try {
+    const textToEmbed = `${name}. ${description}. ${tags?.join(', ') || ''}`;
+    const embedding = await groqEmbed(textToEmbed) as number[];
+    if (update.$set) {
+      update.$set.embedding = embedding;
+    } else {
+      update.embedding = embedding;
+    }
+  } catch (error) {
+    console.error('Failed to generate embedding on update:', error);
+  }
+}
+
+ProductSchema.pre('findOneAndUpdate', async function () {
+  const update = this.getUpdate() as Record<string, any>;
+  const current = (await this.model.findOne(this.getQuery())) as IProduct | null;
+  await generateEmbeddingForUpdate(update, current);
+});
+
+ProductSchema.pre('updateOne', async function () {
+  const update = this.getUpdate() as Record<string, any>;
+  const current = (await this.model.findOne(this.getQuery())) as IProduct | null;
+  await generateEmbeddingForUpdate(update, current);
+});
+
 export default (mongoose.models.Product as Model<IProduct>) || mongoose.model<IProduct>('Product', ProductSchema);
