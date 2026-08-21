@@ -41,6 +41,7 @@ export default function ProductDetailPage() {
   const displayPrice = product?.discountPrice && product.discountPrice < product.price ? product.discountPrice : product?.price;
 
   const { data, isLoading } = useGetProductBySlugQuery(slug, { skip: !slug });
+  console.log(data)
 
   useEffect(() => {
     if (!data) return;
