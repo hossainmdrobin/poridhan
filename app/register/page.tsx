@@ -46,7 +46,7 @@ export default function RegisterPage() {
       className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-16"
     >
       <h1 className="text-3xl font-bold text-neutral-900">Create Account</h1>
-      <p className="mt-2 text-neutral-600">Join Poridhan for the best shopping experience.</p>
+      <p className="mt-2 text-neutral-600">Join Styrob for the best shopping experience.</p>
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {error && <p className="rounded bg-red-50 p-3 text-sm text-red-600">{error}</p>}
         <Input

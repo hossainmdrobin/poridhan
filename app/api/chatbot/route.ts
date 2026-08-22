@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Poridhan Assistant API',
+    message: 'Styrob Assistant API',
     status: 'active',
     capabilities: [
       'Product inquiries',

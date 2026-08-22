@@ -19,7 +19,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Poridhan | Premium Fashion",
+  title: "Styrob | Premium Fashion",
   description: "Premium fashion for the modern lifestyle. Quality fabrics, timeless design.",
 };
 

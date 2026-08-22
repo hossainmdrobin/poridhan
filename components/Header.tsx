@@ -34,7 +34,7 @@ export default function Header() {
         </button>
 
         <Link href="/" className="text-2xl font-bold tracking-tight text-neutral-900">
-          PORIDHAN
+          STYROB
         </Link>
 
         <nav className="hidden lg:flex lg:gap-8">

@@ -2,6 +2,7 @@ import { Product } from '@/models';
 import { connectToDB } from './../db';
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { groqEmbed } from './modelManager';
 
 
 /**
@@ -166,6 +167,108 @@ export const checkStock = tool(
         .string()
         .optional()
         .describe("Specific color the customer wants"),
+    }),
+  }
+);
+
+/**
+ * Search products by semantic vector similarity.
+ */
+export const productVectorSearch = tool(
+  async ({ query, limit, threshold }) => {
+    await connectToDB();
+
+    let queryEmbedding: number[];
+    try {
+      const embedding = await groqEmbed(query);
+      const normalizedEmbedding = Array.isArray(embedding)
+        ? embedding.filter((value): value is number => typeof value === "number")
+        : [];
+
+      if (!normalizedEmbedding.length || normalizedEmbedding.length !== embedding?.length) {
+        return JSON.stringify({
+          success: false,
+          message: "Failed to generate embedding for the query.",
+        });
+      }
+
+      queryEmbedding = normalizedEmbedding;
+    } catch {
+      return JSON.stringify({
+        success: false,
+        message: "Failed to generate embedding for the query.",
+      });
+    }
+
+    const products = await Product.aggregate([
+      {
+        $vectorSearch: {
+          index: "autoembed_index",
+          path: "embedding",
+          queryVector: queryEmbedding,
+          numCandidates: 100,
+          limit,
+        },
+      },
+      {
+        $match: { isActive: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          price: 1,
+          description: 1,
+          images: 1,
+          colors: 1,
+          stock: 1,
+          score: { $meta: "vectorSearchScore" },
+        },
+      },
+      {
+        $match: { score: { $gte: threshold } },
+      },
+    ]);
+
+    return JSON.stringify({
+      success: true,
+      products: products.map((product: any) => ({
+        id: product._id.toString(),
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        images: product.images,
+        colors: product.colors,
+        stock: product.stock,
+        score: product.score,
+      })),
+    });
+  },
+  {
+    name: "productVectorSearch",
+    description:
+      "Search the store's products by semantic similarity using vector embeddings. Use this when a customer describes what they are looking for in natural language and the keyword search might not find relevant results.",
+    schema: z.object({
+      query: z
+        .string()
+        .describe(
+          "Natural language product search query, such as 'comfortable cotton kurta for summer' or 'formal shoes for office'"
+        ),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(10)
+        .default(5)
+        .describe("Maximum number of products to return"),
+      threshold: z
+        .number()
+        .min(0)
+        .max(1)
+        .default(0.5)
+        .describe(
+          "Minimum cosine similarity score (0 to 1) to consider a result relevant"
+        ),
     }),
   }
 );

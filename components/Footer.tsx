@@ -48,7 +48,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="text-2xl font-bold tracking-tight text-neutral-900">
-              PORIDHAN
+              STYROB
             </Link>
             <p className="mt-4 max-w-sm text-sm text-neutral-600">
               Premium fashion for the modern lifestyle. Quality fabrics, timeless design, and sustainable choices.
