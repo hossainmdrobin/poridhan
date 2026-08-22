@@ -68,7 +68,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.4, delay: index * 0.05 }}
     >
       <Link href={`/products/${product.slug}`}>
-        <div className="group relative aspect-[3/4] overflow-hidden bg-neutral-100">
+        <div className="group relative aspect-[3/4] overflow-hidden bg-neutral-100 shadow-md">
           <Image
             src={imageUrl}
             alt={product.name}

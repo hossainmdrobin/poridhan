@@ -42,7 +42,6 @@ export default function ProductDetailPage() {
   const displayPrice = product?.discountPrice && product.discountPrice < product.price ? product.discountPrice : product?.price;
 
   const { data, isLoading } = useGetProductBySlugQuery(slug, { skip: !slug });
-
   useEffect(() => {
     if (!data) return;
     setProduct(data);
@@ -166,7 +165,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
-      <RelatedProducts />
+      <RelatedProducts products={data?.relatedProducts || []} />
     </motion.div>
   );
 }
