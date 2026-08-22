@@ -11,6 +11,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import Button from '@/components/ui/Button';
 import { useGetProductBySlugQuery } from '@/store/api';
+import RelatedProducts from './RelatedProducts';
 
 interface Product {
   _id: string;
@@ -41,7 +42,6 @@ export default function ProductDetailPage() {
   const displayPrice = product?.discountPrice && product.discountPrice < product.price ? product.discountPrice : product?.price;
 
   const { data, isLoading } = useGetProductBySlugQuery(slug, { skip: !slug });
-  console.log(data)
 
   useEffect(() => {
     if (!data) return;
@@ -166,6 +166,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      <RelatedProducts />
     </motion.div>
   );
 }

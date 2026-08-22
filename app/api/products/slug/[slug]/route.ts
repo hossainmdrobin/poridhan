@@ -16,11 +16,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     const relatedProducts = await Product.aggregate([
       {
         $vectorSearch: {
-          index: 'product_embedding_vector',
+          index: 'autoembed_index',
           path: 'embedding',
           queryVector: product.embedding,
           numCandidates: 100,
-          limit:5,
+          limit: 5,
         },
       },
       // {
@@ -37,13 +37,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
           score: { $meta: 'vectorSearchScore' },
         },
       },
-      // {
-      //   $match: { score: { $gte: 0.4 } },
-      // },
+      {
+        $match: {
+          score: {
+            $gte: 0.5,
+            $lt: 1
+          }
+        }
+      }
     ]);
-    
 
-    return NextResponse.json({...product,embedding:[],relatedProducts});
+
+    return NextResponse.json({ ...product, embedding: [], relatedProducts });
   } catch (error) {
     console.error('Product error:', error);
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
